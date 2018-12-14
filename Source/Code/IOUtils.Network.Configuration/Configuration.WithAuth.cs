@@ -17,7 +17,7 @@
  */
 using System;
 
-namespace NetworkUtils.Configuration
+namespace IOUtils.Network.Configuration
 {
    /// <summary>
    /// This class extends <see cref="NetworkConnectionCreationInfo{TCreationData, TConnectionConfiguration, TInitializationConfiguration, TProtocolConfiguration, TPoolingConfiguration}"/> to add possibility for protocol-level authentication configuration.

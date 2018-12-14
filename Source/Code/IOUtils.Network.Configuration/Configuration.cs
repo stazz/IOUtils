@@ -17,14 +17,14 @@
  */
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Net;
+using System.Threading.Tasks;
 
 #if !NETSTANDARD1_0
 using System.Security.Authentication;
 #endif
 
-namespace NetworkUtils.Configuration
+namespace IOUtils.Network.Configuration
 {
    /// <summary>
    /// This class represents typical creation parameters for resource pools using some kind of network protocol.
@@ -51,47 +51,8 @@ namespace NetworkUtils.Configuration
       {
          this.CreationData = data ?? throw new ArgumentNullException( nameof( data ) );
 
-#if NETSTANDARD2_0 || NETCOREAPP1_1 || NET45 || NET40
-         this.ProvideSSLStream = (
-            Stream innerStream,
-            Boolean leaveInnerStreamOpen,
-            RemoteCertificateValidationCallback userCertificateValidationCallback,
-            LocalCertificateSelectionCallback userCertificateSelectionCallback,
-            out AuthenticateAsClientAsync authenticateAsClientAsync
-            ) =>
-         {
-            authenticateAsClientAsync = (
-               Stream stream,
-               String targetHost,
-               System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates,
-               SslProtocols enabledSslProtocols,
-               Boolean checkCertificateRevocation
-            ) =>
-            {
-               return ( (System.Net.Security.SslStream) stream ).AuthenticateAsClientAsync( targetHost, clientCertificates, enabledSslProtocols, checkCertificateRevocation );
-            };
-
-            return new System.Net.Security.SslStream(
-               innerStream,
-               leaveInnerStreamOpen,
-                  (
-                     Object sender,
-                     System.Security.Cryptography.X509Certificates.X509Certificate certificate,
-                     System.Security.Cryptography.X509Certificates.X509Chain chain,
-                     System.Net.Security.SslPolicyErrors sslPolicyErrors
-                     ) => userCertificateValidationCallback?.Invoke( sender, certificate, chain, sslPolicyErrors ) ?? true,
-               userCertificateSelectionCallback == null ?
-                  (System.Net.Security.LocalCertificateSelectionCallback) null :
-                  (
-                     Object sender,
-                     String targetHost,
-                     System.Security.Cryptography.X509Certificates.X509CertificateCollection localCertificates,
-                     System.Security.Cryptography.X509Certificates.X509Certificate remoteCertificate,
-                     String[] acceptableIssuers
-                  ) => userCertificateSelectionCallback( sender, targetHost, localCertificates, remoteCertificate, acceptableIssuers ),
-               System.Net.Security.EncryptionPolicy.RequireEncryption
-               );
-         };
+#if !NETSTANDARD1_0 && !NETSTANDARD1_3
+         this.ProvideSSLStream = Defaults.ProvideSSLStream;
 #endif
 
 #if !NETSTANDARD1_0 && !NETSTANDARD1_3
@@ -292,9 +253,9 @@ namespace NetworkUtils.Configuration
       //public Int32 LocalPort { get; set; }
 
       /// <summary>
-      /// Gets or sets the <see cref="UtilPack.Configuration.NetworkStream.ConnectionSSLMode"/> to control the SSL encryption for the socket connection.
+      /// Gets or sets the <see cref="Configuration.ConnectionSSLMode"/> to control the SSL encryption for the socket connection.
       /// </summary>
-      /// <value>The <see cref="UtilPack.Configuration.NetworkStream.ConnectionSSLMode"/> to control the SSL encryption for the socket connection.</value>
+      /// <value>The <see cref="Configuration.ConnectionSSLMode"/> to control the SSL encryption for the socket connection.</value>
       public ConnectionSSLMode ConnectionSSLMode { get; set; }
 
       /// <summary>
@@ -302,7 +263,7 @@ namespace NetworkUtils.Configuration
       /// </summary>
       /// <value>The <see cref="SslProtocols"/> controlling what kind of SSL encryption will be used for the socket connection.</value>
       /// <remarks>
-      /// This field will only be used of <see cref="ConnectionSSLMode"/> property will be something else than <see cref="NetworkStream.ConnectionSSLMode.NotRequired"/>
+      /// This field will only be used if <see cref="ConnectionSSLMode"/> property will be something else than <see cref="Configuration.ConnectionSSLMode.NotRequired"/>
       /// </remarks>
       public SslProtocols SSLProtocols { get; set; }
 
@@ -533,6 +494,62 @@ namespace NetworkUtils.Configuration
             stream
             );
       }
+   }
+#endif
+
+#if !NETSTANDARD1_3
+
+   /// <summary>
+   /// This class contains some default values for various other properties used in this assembly.
+   /// </summary>
+   public static class Defaults
+   {
+      /// <summary>
+      /// Gets the callback which will use default .NET framework types to provide SSL functionality.
+      /// </summary>
+      public static ProvideSSLStream ProvideSSLStream { get; } = (
+            Stream innerStream,
+            Boolean leaveInnerStreamOpen,
+            RemoteCertificateValidationCallback userCertificateValidationCallback,
+            LocalCertificateSelectionCallback userCertificateSelectionCallback,
+            out AuthenticateAsClientAsync authenticateAsClientAsync
+            ) =>
+         {
+            authenticateAsClientAsync = (
+               Stream stream,
+               String targetHost,
+               System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates,
+               SslProtocols enabledSslProtocols,
+               Boolean checkCertificateRevocation
+            ) =>
+            {
+               return ( (System.Net.Security.SslStream) stream ).AuthenticateAsClientAsync( targetHost, clientCertificates, enabledSslProtocols, checkCertificateRevocation );
+            };
+
+            return new System.Net.Security.SslStream(
+               innerStream,
+               leaveInnerStreamOpen,
+                  (
+                     Object sender,
+                     System.Security.Cryptography.X509Certificates.X509Certificate certificate,
+                     System.Security.Cryptography.X509Certificates.X509Chain chain,
+                     System.Net.Security.SslPolicyErrors sslPolicyErrors
+                     ) => userCertificateValidationCallback?.Invoke( sender, certificate, chain, sslPolicyErrors ) ?? true,
+               userCertificateSelectionCallback == null ?
+                  (System.Net.Security.LocalCertificateSelectionCallback) null :
+                  (
+                     Object sender,
+                     String targetHost,
+                     System.Security.Cryptography.X509Certificates.X509CertificateCollection localCertificates,
+                     System.Security.Cryptography.X509Certificates.X509Certificate remoteCertificate,
+                     String[] acceptableIssuers
+                  ) => userCertificateSelectionCallback( sender, targetHost, localCertificates, remoteCertificate, acceptableIssuers )
+#if !IS_CI_BUILD || !NET40
+               // When building on Linux, we don't have *real* net40 reference assemblies, but the ones downloaded from Mono. Those don't have this constructor.
+               , System.Net.Security.EncryptionPolicy.RequireEncryption
+#endif
+               );
+         };
    }
 #endif
 

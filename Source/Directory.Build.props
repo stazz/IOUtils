@@ -1,13 +1,8 @@
 <Project>
+
+  <Import Project="$(MSBuildThisFileDirectory)/Directory.Build.BuildTargetFolders.props" />
+
   <PropertyGroup>
-    <BuildCommonBaseDir>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)', 'BuildMarker.txt'))</BuildCommonBaseDir>
-    <BuildCommonBaseDir Condition=" '$(BuildCommonBaseDir)' == '' ">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)/../../'))</BuildCommonBaseDir>
-    <BuildCommonOutputDir Condition=" '$(BuildCommonOutputDir)' == '' ">$(BuildCommonBaseDir)\BuildTarget\</BuildCommonOutputDir>
-    <BuildCommonObjDir>$(BuildCommonOutputDir)obj\</BuildCommonObjDir>
-    <BuildCommonBinDir>$(BuildCommonOutputDir)bin\</BuildCommonBinDir>
-    <BaseIntermediateOutputPath>$(BuildCommonObjDir)$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <BaseOutputPath>$(BuildCommonBinDir)\$(MSBuildProjectName)\</BaseOutputPath>
-    <RestoreOutputPath>$(BaseIntermediateOutputPath)</RestoreOutputPath>
     <Authors>Stanislav Muhametsin</Authors>
     <Company></Company>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -20,16 +15,16 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)' == 'Release' and Exists('$(AssemblyOriginatorKeyFilePath)')">
-    <AssemblyOriginatorKeyFile>$(AssemblyOriginatorKeyFilePath)</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  
+   
   <!-- Disable all debug information in release mode-->
   <PropertyGroup Condition=" '$(Configuration)' == 'Release'">
     <DebugType>none</DebugType>
     <DebugSymbols>False</DebugSymbols>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Currently, we need to know if we are building for CI at build time, because Mono .NET 4 reference assemblies are a bit different than actual .NET 4 reference assemblies. -->
+  <PropertyGroup>
+    <DefineConstants Condition=" '$(CIPropsFilePath)' != '' ">$(DefineConstants);IS_CI_BUILD</DefineConstants>
   </PropertyGroup>
 </Project>

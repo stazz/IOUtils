@@ -21,7 +21,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UtilPack;
 
-namespace NetworkUtils.ResourcePooling
+namespace IOUtils.Network.ResourcePooling
 {
    /// <summary>
    /// This class contains miscellaneous methods.

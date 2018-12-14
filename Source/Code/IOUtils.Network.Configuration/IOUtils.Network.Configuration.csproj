@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.0;netstandard1.3;netstandard2.0;netcoreapp1.1;net45;net40</TargetFrameworks>
+    <TargetFrameworks>netstandard1.0;netstandard1.3;netstandard2.0;netcoreapp1.1;netcoreapp2.0;net45;net40</TargetFrameworks>
   </PropertyGroup>
    
   <PropertyGroup>
@@ -9,7 +9,6 @@
     <TreatSpecificWarningsAsErrors />
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     <LangVersion>latest</LangVersion>
-    <GeneratePackageOnBuild Condition=" '$(Configuration)' == 'Release' ">true</GeneratePackageOnBuild>
   </PropertyGroup>
    
   <PropertyGroup>
@@ -29,5 +28,5 @@
     <Title>Common Configuration Types for Network Protocols</Title>
   </PropertyGroup>
 
-
+  <Import Project="$(CIPropsFilePath)" Condition=" '$(CIPropsFilePath)' != '' and Exists('$(CIPropsFilePath)') " />
 </Project>

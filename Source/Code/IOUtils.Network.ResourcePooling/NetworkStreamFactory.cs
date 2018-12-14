@@ -15,7 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-using NetworkUtils.ResourcePooling;
+using IOUtils.Network.Configuration;
+using IOUtils.Network.ResourcePooling;
 using ResourcePooling.Async.Abstractions;
 using System;
 using System.Collections.Generic;
@@ -26,14 +27,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UtilPack;
-using static NetworkUtils.Configuration.ConnectionSSLMode;
-using TAuthenticateAsClientAsync = NetworkUtils.Configuration.AuthenticateAsClientAsync;
-using TLocalCertificateSelectionCallback = NetworkUtils.Configuration.LocalCertificateSelectionCallback;
+using static IOUtils.Network.Configuration.ConnectionSSLMode;
+using TAuthenticateAsClientAsync = IOUtils.Network.Configuration.AuthenticateAsClientAsync;
+using TLocalCertificateSelectionCallback = IOUtils.Network.Configuration.LocalCertificateSelectionCallback;
 using TNetworkStream = System.Net.Sockets.NetworkStream;
-using TProvideSSLStream = NetworkUtils.Configuration.ProvideSSLStream;
-using TRemoteCertificateValidationCallback = NetworkUtils.Configuration.RemoteCertificateValidationCallback;
+using TProvideSSLStream = IOUtils.Network.Configuration.ProvideSSLStream;
+using TRemoteCertificateValidationCallback = IOUtils.Network.Configuration.RemoteCertificateValidationCallback;
 
-namespace NetworkUtils.ResourcePooling
+namespace IOUtils.Network.ResourcePooling
 {
    /// <summary>
    /// This is abstract base class for <see cref="NetworkStreamFactory"/> and <see cref="NetworkStreamFactory{TState}"/>.
@@ -484,8 +485,8 @@ namespace NetworkUtils.ResourcePooling
    /// <summary>
    /// This is base class for <see cref="NetworkStreamFactoryConfiguration"/> and <see cref="NetworkStreamFactoryConfiguration{TState}"/> containing properties which are common for both.
    /// </summary>
-   /// <seealso cref="E_UtilPack.CreateNetworkStreamFactoryConfiguration"/>
-   /// <seealso cref="E_UtilPack.CreateStatefulNetworkStreamFactoryConfiguration"/>
+   /// <seealso cref="E_IOUtils.CreateNetworkStreamFactoryConfiguration"/>
+   /// <seealso cref="E_IOUtils.CreateStatefulNetworkStreamFactoryConfiguration"/>
    public abstract class AbstractNetworkStreamFactoryConfiguration
    {
 
@@ -508,46 +509,7 @@ namespace NetworkUtils.ResourcePooling
          this.SocketType = SocketType.Stream;
          this.ProtocolType = ProtocolType.Tcp;
 #if !NETSTANDARD1_3
-         this.ProvideSSLStream = (
-            Stream innerStream,
-            Boolean leaveInnerStreamOpen,
-            TRemoteCertificateValidationCallback userCertificateValidationCallback,
-            TLocalCertificateSelectionCallback userCertificateSelectionCallback,
-            out TAuthenticateAsClientAsync authenticateAsClientAsync
-            ) =>
-         {
-            authenticateAsClientAsync = (
-               Stream stream,
-               String targetHost,
-               System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates,
-               System.Security.Authentication.SslProtocols enabledSslProtocols,
-               Boolean checkCertificateRevocation
-            ) =>
-            {
-               return ( (System.Net.Security.SslStream) stream ).AuthenticateAsClientAsync( targetHost, clientCertificates, enabledSslProtocols, checkCertificateRevocation );
-            };
-
-            return new System.Net.Security.SslStream(
-               innerStream,
-               leaveInnerStreamOpen,
-                  (
-                     Object sender,
-                     System.Security.Cryptography.X509Certificates.X509Certificate certificate,
-                     System.Security.Cryptography.X509Certificates.X509Chain chain,
-                     System.Net.Security.SslPolicyErrors sslPolicyErrors
-                     ) => userCertificateValidationCallback?.Invoke( sender, certificate, chain, sslPolicyErrors ) ?? true,
-               userCertificateSelectionCallback == null ?
-                  (System.Net.Security.LocalCertificateSelectionCallback) null :
-                  (
-                     Object sender,
-                     String targetHost,
-                     System.Security.Cryptography.X509Certificates.X509CertificateCollection localCertificates,
-                     System.Security.Cryptography.X509Certificates.X509Certificate remoteCertificate,
-                     String[] acceptableIssuers
-                  ) => userCertificateSelectionCallback( sender, targetHost, localCertificates, remoteCertificate, acceptableIssuers ),
-               System.Net.Security.EncryptionPolicy.RequireEncryption
-               );
-         };
+         this.ProvideSSLStream = Defaults.ProvideSSLStream;
 #endif
       }
 
@@ -670,7 +632,7 @@ namespace NetworkUtils.ResourcePooling
       public Func<Exception> SSLStreamProviderNoAuthenticationCallback { get; set; }
 
       /// <summary>
-      /// This is callback to create an <see cref="Exception"/> when the <see cref="NetworkStreamFactoryConfiguration.ConnectionSSLMode"/>/<see cref="NetworkStreamFactoryConfiguration{TState}.ConnectionSSLMode"/> returned <see cref="ConnectionSSLMode.Required"/>, but something throws an exception when preparing and authenticating SSL stream.
+      /// This is callback to create an <see cref="Exception"/> when the <see cref="NetworkStreamFactoryConfiguration.ConnectionSSLMode"/>/<see cref="NetworkStreamFactoryConfiguration{TState}.ConnectionSSLMode"/> returned <see cref="Required"/>, but something throws an exception when preparing and authenticating SSL stream.
       /// </summary>
       /// <value>The callback to create an <see cref="Exception"/> when something throws an exception when preparing and authenticating SSL stream.</value>
       /// <remarks>
@@ -691,18 +653,18 @@ namespace NetworkUtils.ResourcePooling
    /// <summary>
    /// This class extends <see cref="AbstractNetworkStreamFactoryConfiguration"/> to provide required callbacks for stateless network stream initialization.
    /// </summary>
-   /// <seealso cref="E_UtilPack.CreateNetworkStreamFactoryConfiguration"/>
-   /// <seealso cref="E_UtilPack.CreateStatefulNetworkStreamFactoryConfiguration"/>
+   /// <seealso cref="E_IOUtils.CreateNetworkStreamFactoryConfiguration"/>
+   /// <seealso cref="E_IOUtils.CreateStatefulNetworkStreamFactoryConfiguration"/>
    public class NetworkStreamFactoryConfiguration : AbstractNetworkStreamFactoryConfiguration
    {
       /// <summary>
-      /// Gets or sets the callback to get <see cref="Configuration.NetworkStream.ConnectionSSLMode"/>.
+      /// Gets or sets the callback to get <see cref="Configuration.ConnectionSSLMode"/>.
       /// </summary>
-      /// <value>The callback to get <see cref="Configuration.NetworkStream.ConnectionSSLMode"/>.</value>
+      /// <value>The callback to get <see cref="Configuration.ConnectionSSLMode"/>.</value>
       /// <remarks>
-      /// If this callback is <c>null</c>, the <see cref="NetworkStreamFactory"/> will default to <see cref="Configuration.NetworkStream.ConnectionSSLMode.NotRequired"/>.
+      /// If this callback is <c>null</c>, the <see cref="NetworkStreamFactory"/> will default to <see cref="NotRequired"/>.
       /// </remarks>
-      public Func<NetworkUtils.Configuration.ConnectionSSLMode> ConnectionSSLMode { get; set; }
+      public Func<ConnectionSSLMode> ConnectionSSLMode { get; set; }
 
       /// <summary>
       /// Gets or sets the callback to check whether SSL is possible.
@@ -736,8 +698,8 @@ namespace NetworkUtils.ResourcePooling
    /// This class extends <see cref="AbstractNetworkStreamFactoryConfiguration"/> to provide required callbacks for stateful network stream initialization.
    /// </summary>
    /// <typeparam name="TState">The type of the intermediate state that is passed to callbacks.</typeparam>
-   /// <seealso cref="E_UtilPack.CreateNetworkStreamFactoryConfiguration"/>
-   /// <seealso cref="E_UtilPack.CreateStatefulNetworkStreamFactoryConfiguration"/>
+   /// <seealso cref="E_IOUtils.CreateNetworkStreamFactoryConfiguration"/>
+   /// <seealso cref="E_IOUtils.CreateStatefulNetworkStreamFactoryConfiguration"/>
    public class NetworkStreamFactoryConfiguration<TState> : AbstractNetworkStreamFactoryConfiguration
    {
       /// <summary>
@@ -750,13 +712,13 @@ namespace NetworkUtils.ResourcePooling
       public Func<Socket, TNetworkStream, CancellationToken, TState> CreateState { get; set; }
 
       /// <summary>
-      /// Gets or sets the callback to get <see cref="Configuration.NetworkStream.ConnectionSSLMode"/>.
+      /// Gets or sets the callback to get <see cref="Configuration.ConnectionSSLMode"/>.
       /// </summary>
-      /// <value>The callback to get <see cref="Configuration.NetworkStream.ConnectionSSLMode"/>.</value>
+      /// <value>The callback to get <see cref="Configuration.ConnectionSSLMode"/>.</value>
       /// <remarks>
-      /// If this callback is <c>null</c>, the <see cref="NetworkStreamFactory{TState}"/> will default to <see cref="Configuration.NetworkStream.ConnectionSSLMode.NotRequired"/>.
+      /// If this callback is <c>null</c>, the <see cref="NetworkStreamFactory{TState}"/> will default to <see cref="ConnectionSSLMode.NotRequired"/>.
       /// </remarks>
-      public Func<TState, NetworkUtils.Configuration.ConnectionSSLMode> ConnectionSSLMode { get; set; }
+      public Func<TState, Configuration.ConnectionSSLMode> ConnectionSSLMode { get; set; }
 
       /// <summary>
       /// Gets or sets the callback to potentially asynchronously check whether SSL is possible.
@@ -790,7 +752,7 @@ namespace NetworkUtils.ResourcePooling
 /// <summary>
 /// This class contains extensions methods for types defined in this assembly.
 /// </summary>
-public static partial class E_ResourcePooling
+public static partial class E_IOUtils
 {
    /// <summary>
    /// Helper method to transform this stateless <see cref="NetworkStreamFactoryConfiguration"/> into stateful <see cref="NetworkStreamFactoryConfiguration{TState}"/>.

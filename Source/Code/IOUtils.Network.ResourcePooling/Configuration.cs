@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-using NetworkUtils.Configuration;
-using NetworkUtils.ResourcePooling;
+using IOUtils.Network.Configuration;
+using IOUtils.Network.ResourcePooling;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 using UtilPack;
 using TNetworkStream = System.Net.Sockets.NetworkStream;
 
-namespace NetworkUtils.ResourcePooling
+namespace IOUtils.Network.ResourcePooling
 {
 
    /// <summary>
@@ -38,8 +38,8 @@ namespace NetworkUtils.ResourcePooling
    /// <typeparam name="TConnectionConfiguration">The type of network connection configuration of <typeparamref name="TCreationData"/>. Must be or inherit <see cref="NetworkConnectionConfiguration"/>.</typeparam>
    /// <typeparam name="TInitializationConfiguration">The type of initialization configuration of <typeparamref name="TCreationData"/>. Must be or inherit <see cref="NetworkInitializationConfiguration{TProtocolConfiguration, TPoolingConfiguration}"/>.</typeparam>
    /// <typeparam name="TProtocolConfiguration">The type of protocol configuration of <typeparamref name="TCreationData"/>.</typeparam>
-   /// <typeparam name="TPoolingConfiguration">The type of resource pool configuration of <typeparamref name="TCreationData"/> controlling behaviour of <see cref="AsyncResourcePool{TResource}"/>. Must be or inherit <see cref="NetworkPoolingConfiguration"/>.</typeparam>
-   /// <seealso cref="E_UtilPack.CreateStatefulNetworkStreamFactoryConfiguration"/>
+   /// <typeparam name="TPoolingConfiguration">The type of resource pool configuration of <typeparamref name="TCreationData"/> controlling behaviour of <see cref="global::ResourcePooling.Async.Abstractions.AsyncResourcePool{TResource}"/>. Must be or inherit <see cref="NetworkPoolingConfiguration"/>.</typeparam>
+   /// <seealso cref="E_IOUtils.CreateStatefulNetworkStreamFactoryConfiguration"/>
    public sealed class StatefulNetworkStreamFactoryCreator<TCreationData, TConnectionConfiguration, TInitializationConfiguration, TProtocolConfiguration, TPoolingConfiguration>
       where TCreationData : NetworkConnectionCreationInfoData<TConnectionConfiguration, TInitializationConfiguration, TProtocolConfiguration, TPoolingConfiguration>
       where TConnectionConfiguration : NetworkConnectionConfiguration
@@ -137,7 +137,7 @@ namespace NetworkUtils.ResourcePooling
 /// <summary>
 /// Contains extension methods for types defined in this assembly.
 /// </summary>
-public static partial class E_ResourcePooling
+public static partial class E_IOUtils
 {
    /// <summary>
    /// Creates a <see cref="NetworkStreamFactoryConfiguration"/> along with other items based on this <see cref="NetworkConnectionCreationInfo{TCreationData, TConnectionConfiguration, TInitializationConfiguration, TProtocolConfiguration, TPoolingConfiguration}"/>.
@@ -225,7 +225,7 @@ public static partial class E_ResourcePooling
    /// <typeparam name="TConnectionConfiguration">The type of network connection configuration of <typeparamref name="TCreationData"/>. Must be or inherit <see cref="NetworkConnectionConfiguration"/>.</typeparam>
    /// <typeparam name="TInitializationConfiguration">The type of initialization configuration of <typeparamref name="TCreationData"/>. Must be or inherit <see cref="NetworkInitializationConfiguration{TProtocolConfiguration, TPoolingConfiguration}"/>.</typeparam>
    /// <typeparam name="TProtocolConfiguration">The type of protocol configuration of <typeparamref name="TCreationData"/>.</typeparam>
-   /// <typeparam name="TPoolingConfiguration">The type of resource pool configuration of <typeparamref name="TCreationData"/> controlling behaviour of <see cref="UtilPack.ResourcePooling.AsyncResourcePool{TResource}"/>. Must be or inherit <see cref="NetworkPoolingConfiguration"/>.</typeparam>
+   /// <typeparam name="TPoolingConfiguration">The type of resource pool configuration of <typeparamref name="TCreationData"/> controlling behaviour of <see cref="global::ResourcePooling.Async.Abstractions.AsyncResourcePool{TResource}"/>. Must be or inherit <see cref="NetworkPoolingConfiguration"/>.</typeparam>
    /// <param name="creationInfo">This <see cref="NetworkConnectionCreationInfo{TCreationData, TConnectionConfiguration, TInitializationConfiguration, TProtocolConfiguration, TPoolingConfiguration}"/>.</param>
    /// <returns>An class that can be used to create <see cref="NetworkStreamFactoryConfiguration{TState}"/> instances.</returns>
    /// <exception cref="NullReferenceException">If this <see cref="NetworkConnectionCreationInfo{TCreationData, TConnectionConfiguration, TInitializationConfiguration, TProtocolConfiguration, TPoolingConfiguration}"/> is <c>null</c>.</exception>
