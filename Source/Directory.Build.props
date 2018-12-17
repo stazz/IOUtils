@@ -1,0 +1,30 @@
+<Project>
+
+  <Import Project="$(MSBuildThisFileDirectory)/Directory.Build.BuildTargetFolders.props" />
+
+  <PropertyGroup>
+    <Authors>Stanislav Muhametsin</Authors>
+    <Company></Company>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Product>IOUtils</Product>
+    <Copyright>Stanislav Muhametsin</Copyright>
+    <AssemblyOriginatorKeyFilePath>$(MSBuildThisFileDirectory)\..\Keys\$(Product).snk</AssemblyOriginatorKeyFilePath>
+    <PackageProjectUrl>https://github.com/stazz/$(Product)</PackageProjectUrl>
+    <RepositoryUrl>$(PackageProjectUrl)/tree/develop/Source/$(MSBuildProjectName)</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+   
+  <!-- Disable all debug information in release mode-->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>False</DebugSymbols>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Currently, we need to know if we are building for CI at build time, because Mono .NET 4 reference assemblies are a bit different than actual .NET 4 reference assemblies. -->
+  <PropertyGroup>
+    <DefineConstants Condition=" '$(CIPropsFilePath)' != '' ">$(DefineConstants);IS_CI_BUILD</DefineConstants>
+  </PropertyGroup>
+</Project>
