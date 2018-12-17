@@ -28,7 +28,7 @@
     <VersionPrefix>1.0.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <AssemblyTitle>$(AssemblyName)</AssemblyTitle>
-    <Description>Easy-to-use async resource pool for streams operating on sockets.</Description>
+    <Description>This library integrates with ResourcePooling library in order to provide common way to create new resources for the pools. The common factor with those resources in this case is that they are based on socket communication, via NetworkStream. Extend NetworkStreamFactory class to implement AsyncResourceFactory&lt;TResource, TParams&gt;, and use extension methods defined for NetworkConnectionCreationInfo to acquire NetworkStreamFactoryConfiguration required for using NetworkStreamFactory.</Description>
   </PropertyGroup>
 
   <!-- NuGet package stuff -->
@@ -36,9 +36,9 @@
     <PackageId>$(AssemblyName)</PackageId>
     <PackageVersion>$(VersionPrefix)</PackageVersion>
     <PackageVersion Condition=" '$(VersionSuffix)' != ''">$(PackageVersion)-$(VersionSuffix)</PackageVersion>
-    <PackageReleaseNotes>Separated common configuration into its own project, and added easy-to-use methods to default usecases of transforming that configuration into NetworkStreamFactoryConfiguration. Added possibility to connect to Unix sockets.</PackageReleaseNotes>
+    <PackageReleaseNotes>Initial release, was UtilPack.ResourcePooling.NetworkStream before.</PackageReleaseNotes>
     <PackageTags>utilpack async resource pool network stream factory socket</PackageTags>
-    <Title>NetworkStream Pooling</Title>
+    <Title>IOUtils Networking: ResourcePooling Integration</Title>
   </PropertyGroup>
 
   <PropertyGroup>

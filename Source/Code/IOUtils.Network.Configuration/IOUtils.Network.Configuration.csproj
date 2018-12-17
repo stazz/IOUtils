@@ -24,8 +24,8 @@
     <PackageVersion>$(VersionPrefix)</PackageVersion>
     <PackageVersion Condition=" '$(VersionSuffix)' != ''">$(PackageVersion)-$(VersionSuffix)</PackageVersion>
     <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
-    <PackageTags>binary serialization async asynchronous connection tabular sql data postgresql pgsql</PackageTags>
-    <Title>Common Configuration Types for Network Protocols</Title>
+    <PackageTags>io async configuration</PackageTags>
+    <Title>IOUtils Networking: Configuration Types</Title>
   </PropertyGroup>
 
   <Import Project="$(CIPropsFilePath)" Condition=" '$(CIPropsFilePath)' != '' and Exists('$(CIPropsFilePath)') " />

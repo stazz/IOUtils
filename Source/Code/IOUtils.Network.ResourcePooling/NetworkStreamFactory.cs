@@ -180,128 +180,6 @@ namespace IOUtils.Network.ResourcePooling
       }
 
       /// <summary>
-      /// This class extends <see cref="EndPoint"/> in order to provide functionality specific for Unix domain sockets.
-      /// </summary>
-      public sealed class UnixEndPoint : EndPoint
-      {
-         private static readonly Encoding _Encoding = new UTF8Encoding( false, false );
-
-         private String _filePath;
-
-         /// <summary>
-         /// Creates a new <see cref="UnixEndPoint"/> with given file path as Unix domain socket.
-         /// </summary>
-         /// <param name="filePath">The file path where the server socket resides.</param>
-         /// <remarks>
-         /// Empty file path will be used if <paramref name="filePath"/> is <c>null</c>.
-         /// </remarks>
-         public UnixEndPoint( String filePath )
-         {
-            this.FilePath = filePath;
-         }
-
-         /// <summary>
-         /// Gets or sets the file path of the Unix domain socket.
-         /// </summary>
-         /// <value>The file path of the Unix domain socket.</value>
-         public String FilePath
-         {
-            get
-            {
-               return this._filePath;
-            }
-            set
-            {
-               this._filePath = value ?? String.Empty;
-            }
-         }
-
-         /// <summary>
-         /// Returns <see cref="AddressFamily.Unix"/>.
-         /// </summary>
-         /// <value>The <see cref="AddressFamily.Unix"/>.</value>
-         public override AddressFamily AddressFamily => AddressFamily.Unix;
-
-         /// <summary>
-         /// Creates a new <see cref="UnixEndPoint"/> from serialized <see cref="SocketAddress"/>.
-         /// </summary>
-         /// <param name="socketAddress">A serialized <see cref="SocketAddress"/>.</param>
-         /// <returns>A deserialized <see cref="UnixEndPoint"/>.</returns>
-         /// <exception cref="ArgumentException">If given <paramref name="socketAddress"/> does not represent address family of <see cref="System.Net.Sockets.AddressFamily.Unix"/>.</exception>
-         public override EndPoint Create( SocketAddress socketAddress )
-         {
-            var serializedAddressFamily = (AddressFamily) ( socketAddress[0] | ( socketAddress[1] << 8 ) );
-            if ( serializedAddressFamily != AddressFamily.Unix )
-            {
-               throw new ArgumentException( "Given socket address is not a Unix socket address." );
-            }
-
-            var socketSize = socketAddress.Size;
-            String fileName;
-            if ( socketSize <= 2 )
-            {
-               fileName = String.Empty;
-            }
-            else
-            {
-               //There may be junk after null terminator so we need to examine every byte
-               var i = 0;
-               var max = socketAddress.Size - 2;
-               var bytes = new Byte[max];
-               Byte b;
-               while ( i < max && ( b = socketAddress[i] ) != 0 )
-               {
-                  bytes[i++] = b;
-               }
-               fileName = _Encoding.GetString( bytes, 0, i );
-            }
-
-            return new UnixEndPoint( fileName );
-         }
-
-         /// <summary>
-         /// Serializes this instance into <see cref="SocketAddress"/>.
-         /// </summary>
-         /// <returns>A serialized <see cref="SocketAddress"/>.</returns>
-         public override SocketAddress Serialize()
-         {
-            // We must allocate new array and then copy manually, as there is no copy method provided for socket address...
-            var bytes = _Encoding.GetBytes( this.FilePath );
-            // 2 extra bytes for address family, 1 for null terminator
-            var address = new SocketAddress( AddressFamily.Unix, bytes.Length + 3 );
-            // Address family in first bytes, set by SocketAddress constructor
-            // No copying into socket address API, so iterate byte by byte
-            for ( var i = 0; i < bytes.Length; ++i )
-            {
-               address[i + 2] = bytes[i];
-            }
-
-            // Explicitly set null terminator in case socket address got some junk in its array
-            address[bytes.Length + 2] = 0;
-            return address;
-         }
-
-         /// <summary>
-         /// Returns <see cref="FilePath"/>.
-         /// </summary>
-         /// <returns>The value of <see cref="FilePath"/>.</returns>
-         public override String ToString() => this.FilePath;
-
-         /// <summary>
-         /// Gets the hash code of this <see cref="UnixEndPoint"/>.
-         /// </summary>
-         /// <returns></returns>
-         public override Int32 GetHashCode() => this.FilePath?.GetHashCode() ?? 0;
-
-         /// <summary>
-         /// Checks that given object is <see cref="UnixEndPoint"/> and that it equals to this <see cref="UnixEndPoint"/>.
-         /// </summary>
-         /// <param name="obj">The object to check.</param>
-         /// <returns><c>true</c> if <paramref name="obj"/> is <see cref="UnixEndPoint"/> and equals to this <see cref="UnixEndPoint"/>; <c>false</c> otherwise.</returns>
-         public override Boolean Equals( Object obj ) => obj is UnixEndPoint other && String.Equals( this.FilePath, other.FilePath );
-      }
-
-      /// <summary>
       /// Acquires the <see cref="Socket"/>, <see cref="Stream"/> and <typeparamref name="TState"/> given <see cref="NetworkStreamFactoryConfiguration{TState}"/> and <see cref="CancellationToken"/>.
       /// </summary>
       /// <param name="parameters">The <see cref="NetworkStreamFactoryConfiguration{TState}"/> to use.</param>
@@ -480,6 +358,128 @@ namespace IOUtils.Network.ResourcePooling
 
          return (socket, stream, state);
       }
+   }
+
+   /// <summary>
+   /// This class extends <see cref="EndPoint"/> in order to provide functionality specific for Unix domain sockets.
+   /// </summary>
+   public sealed class UnixEndPoint : EndPoint
+   {
+      private static readonly Encoding _Encoding = new UTF8Encoding( false, false );
+
+      private String _filePath;
+
+      /// <summary>
+      /// Creates a new <see cref="UnixEndPoint"/> with given file path as Unix domain socket.
+      /// </summary>
+      /// <param name="filePath">The file path where the server socket resides.</param>
+      /// <remarks>
+      /// Empty file path will be used if <paramref name="filePath"/> is <c>null</c>.
+      /// </remarks>
+      public UnixEndPoint( String filePath )
+      {
+         this.FilePath = filePath;
+      }
+
+      /// <summary>
+      /// Gets or sets the file path of the Unix domain socket.
+      /// </summary>
+      /// <value>The file path of the Unix domain socket.</value>
+      public String FilePath
+      {
+         get
+         {
+            return this._filePath;
+         }
+         set
+         {
+            this._filePath = value ?? String.Empty;
+         }
+      }
+
+      /// <summary>
+      /// Returns <see cref="AddressFamily.Unix"/>.
+      /// </summary>
+      /// <value>The <see cref="AddressFamily.Unix"/>.</value>
+      public override AddressFamily AddressFamily => AddressFamily.Unix;
+
+      /// <summary>
+      /// Creates a new <see cref="UnixEndPoint"/> from serialized <see cref="SocketAddress"/>.
+      /// </summary>
+      /// <param name="socketAddress">A serialized <see cref="SocketAddress"/>.</param>
+      /// <returns>A deserialized <see cref="UnixEndPoint"/>.</returns>
+      /// <exception cref="ArgumentException">If given <paramref name="socketAddress"/> does not represent address family of <see cref="System.Net.Sockets.AddressFamily.Unix"/>.</exception>
+      public override EndPoint Create( SocketAddress socketAddress )
+      {
+         var serializedAddressFamily = (AddressFamily) ( socketAddress[0] | ( socketAddress[1] << 8 ) );
+         if ( serializedAddressFamily != AddressFamily.Unix )
+         {
+            throw new ArgumentException( "Given socket address is not a Unix socket address." );
+         }
+
+         var socketSize = socketAddress.Size;
+         String fileName;
+         if ( socketSize <= 2 )
+         {
+            fileName = String.Empty;
+         }
+         else
+         {
+            //There may be junk after null terminator so we need to examine every byte
+            var i = 0;
+            var max = socketAddress.Size - 2;
+            var bytes = new Byte[max];
+            Byte b;
+            while ( i < max && ( b = socketAddress[i] ) != 0 )
+            {
+               bytes[i++] = b;
+            }
+            fileName = _Encoding.GetString( bytes, 0, i );
+         }
+
+         return new UnixEndPoint( fileName );
+      }
+
+      /// <summary>
+      /// Serializes this instance into <see cref="SocketAddress"/>.
+      /// </summary>
+      /// <returns>A serialized <see cref="SocketAddress"/>.</returns>
+      public override SocketAddress Serialize()
+      {
+         // We must allocate new array and then copy manually, as there is no copy method provided for socket address...
+         var bytes = _Encoding.GetBytes( this.FilePath );
+         // 2 extra bytes for address family, 1 for null terminator
+         var address = new SocketAddress( AddressFamily.Unix, bytes.Length + 3 );
+         // Address family in first bytes, set by SocketAddress constructor
+         // No copying into socket address API, so iterate byte by byte
+         for ( var i = 0; i < bytes.Length; ++i )
+         {
+            address[i + 2] = bytes[i];
+         }
+
+         // Explicitly set null terminator in case socket address got some junk in its array
+         address[bytes.Length + 2] = 0;
+         return address;
+      }
+
+      /// <summary>
+      /// Returns <see cref="FilePath"/>.
+      /// </summary>
+      /// <returns>The value of <see cref="FilePath"/>.</returns>
+      public override String ToString() => this.FilePath;
+
+      /// <summary>
+      /// Gets the hash code of this <see cref="UnixEndPoint"/>.
+      /// </summary>
+      /// <returns></returns>
+      public override Int32 GetHashCode() => this.FilePath?.GetHashCode() ?? 0;
+
+      /// <summary>
+      /// Checks that given object is <see cref="UnixEndPoint"/> and that it equals to this <see cref="UnixEndPoint"/>.
+      /// </summary>
+      /// <param name="obj">The object to check.</param>
+      /// <returns><c>true</c> if <paramref name="obj"/> is <see cref="UnixEndPoint"/> and equals to this <see cref="UnixEndPoint"/>; <c>false</c> otherwise.</returns>
+      public override Boolean Equals( Object obj ) => obj is UnixEndPoint other && String.Equals( this.FilePath, other.FilePath );
    }
 
    /// <summary>
