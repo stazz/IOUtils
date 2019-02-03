@@ -6,7 +6,8 @@ cache:
   - 'nuget-package-dir'
   - 'docker-images'
   - 'v4-ref-assemblies'
-
+  - 'dotnet-tools'
+  
 environment:
   RELATIVE_NUGET_PACKAGE_DIR: 'nuget-package-dir/'
   RELATIVE_CS_OUTPUT: 'output/'
